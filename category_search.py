@@ -1,4 +1,4 @@
-from duckduckgo_search import DDGS
+from ddgs import DDGS
 
 from api_tools import call_model_chat_completions
 from category_fallback import get_fallback_answer
@@ -11,6 +11,7 @@ fallback_search_system_prompt = '''
 '''
 final_system_prompt = '''
     You are an expert researching agent. You will be given a question and results from a search engine to help you answer the question. Use the search results to produce a final answer to the question. Output only the final answer.
+    If the search results are insufficient to answer the question, please use your internal knowledge to answer the question. DO NOT answer that the search results are insufficient.
 '''
 
 def web_search(query: str) -> tuple[bool, str]:
