@@ -1,3 +1,5 @@
+import re
+
 from api_tools import call_model_chat_completions
 from category_logic import logic_question
 from category_search import search_question
@@ -17,14 +19,20 @@ def classify_question(input: str) -> str:
 
 def extract_final_answer(answer: str, question: str) -> str:
     system_prompt = '''
-        Your goal is to extract the final answer from the model's response. The final answer should be concise and directly address the question asked. Reply only with the final answer.
-        Please ensure your response ONLY CONTAINS THE FINAL ANSWER.
+        Your goal is to identify the FINAL answer, and ONLY the FINAL answer, in the given response to the question, and wrap it in <answer>...</answer> tags.
+        Please ensure that ONLY the FINAL answer, without ANY EXTRA TEXT, is wrapped in the tags.
     '''
     response = call_model_chat_completions(
         prompt=f"Question: {question}\nResponse: {answer}",
         system=system_prompt
     )
-    return response.get('text', '')
+    response = response.get('text', '')
+
+    match = re.search(r'<answer>(.*?)</answer>', response, re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    else:
+        return response.strip()
 
 def main(input: str) -> str:
     category = classify_question(input)
